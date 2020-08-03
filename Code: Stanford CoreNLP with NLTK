@@ -1,0 +1,73 @@
+from nltk.parse.corenlp import CoreNLPParser		# to use API
+from nltk.parse.corenlp import CoreNLPDependencyParser
+
+cp=CoreNLPParser()	# CoreNLPParser object; use x1,2,3,4,5 to parse
+# Single Tree
+#x1='He smiled.'
+#y1=cp.raw_parse(x1)	# y1, an iterator with one tree, captures phase structure of x1 # = tree('He smiled.')]
+#print(y1)			# <object store>
+#tree=next(y1)		# access the tree
+#print(tree)		# output: (ROOT (S (NP (PRP He)) (VP (VBD smiled)) (. .)))
+#tree.draw()		# opens a window to display a tree diagram
+#tree.pretty_print()		# print out an ASCII art version of the diagram
+
+#Multiple Tree
+#x3=[['He','smiled','.'],['She','smiled','.'],['They','smiled','.']]
+#y3=cp.parse_sents(x3)
+#tree1=next(next(y3))		# tree for 'He smiled'
+#tree2=next(next(y3))		# tree for 'She smiled'
+#tree3=next(next(y3))		# embedded next() for the actual item; otherwise=print(tree)
+#tree=next(y3)			# this does retunrs <boject store>
+#print(tree)			# ..
+# use raw-parse if the item is a str ?	# eg iterator
+# use parse if the item is a list ?	# iterator of iterator
+#for iterator_list in y3:			# to look at trees one at a time
+#	tree=next(iterator_list)
+#	tree.pretty_print()
+
+# Dependency Parsing
+dp=CoreNLPDependencyParser()	# an dependency parser object	 # same method can be applied to dependency
+x1='He smiled.'
+y1=dp.raw_parse(x1)		# parse a single string
+graph=next(y1)			# {number:{'string':Label}},1{}	# a dictionary but formatting differently
+#print(graph)			# dependency and tree object have different methods
+#print(graph.to_conll(4))		# a table format	Word POS Index of head Dependency relaton
+				# it requires a position  a table for dependency relations with 4 columns
+#print(graph.to_conll(10))		# for more infos
+#print(graph.nodes)			# graph as a dictionary
+graph.nodes[2]			# 'smiled'
+graph.nodes[2]['head']		# index of head of 'smiled'
+graph.nodes[2]['rel']			# relation to head
+graph.nodes[2]['deps']		# dependents of 'smiled'
+#print(graph.nodes[2]['deps']['nsubj'])	# indices f nsubj dependents of 'smiled'
+#print(graph.nodes[0])		# the entire thing
+#print(graph.nodes[2]['head'])		# 0
+
+
+# Main Part
+f=open('select.txt')
+for line in f:
+	x=line.strip().split()
+	y=dp.parse(x)
+	graph=next(y)
+	infos=graph.to_conll(4)
+	items=infos.strip().split()
+	for i in range(len(items)):
+		if items[i]=='0':
+			mainword=items[i-2]	# index position of the main verb
+	nodes=graph.nodes
+	for key,values in nodes.items():
+		piece=key,values	# a tuple
+		for i in values:
+			if values[i]=='iobj':
+				print('This is the sentence with an indirect object')
+				print(' '.join(x))
+				y=cp.parse(x)
+				tree=next(y)
+				tree.draw()		
+				tree.pretty_print()		
+
+				
+	
+	
+	
